@@ -909,7 +909,7 @@ class ReactNativeZoomableView extends Component<
       });
       prevScale = newScale;
     });
-    getZoomToAnimation(this.zoomAnim, newZoomLevel).start(() => {
+    getZoomToAnimation(this.zoomAnim, newZoomLevel, this.props.zoomToAnimationConfig).start(() => {
       this.zoomAnim.removeListener(listenerId);
     });
     // == Zoom Animation Ends ==

@@ -23,10 +23,11 @@ export function getPanMomentumDecayAnim(
   });
 }
 
-export function getZoomToAnimation(animValue: Animated.Value, toValue: number) {
-  return Animated.timing(animValue, {
+export function getZoomToAnimation(animValue: Animated.Value, toValue: number, config?: Partial<Animated.TimingAnimationConfig>) {
+  const animationConfig = Object.assign({
     easing: Easing.out(Easing.ease),
     toValue,
-    useNativeDriver: true,
-  });
+    useNativeDriver: true
+  }, config);
+  return Animated.timing(animValue, animationConfig);
 }
