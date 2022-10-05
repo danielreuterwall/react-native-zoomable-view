@@ -314,27 +314,29 @@ class ReactNativeZoomableView extends Component<
       // this setTimeout is here to fix a weird issue on iOS where the measurements are all `0`
       // when navigating back (react-navigation stack) from another view
       // while closing the keyboard at the same time
-      setTimeout(() => {
-        // In normal conditions, we're supposed to measure zoomSubject instead of its wrapper.
-        // However, our zoomSubject may have been transformed by an initial zoomLevel or offset,
-        // in which case these measurements will not represent the true "original" measurements.
-        // We just need to make sure the zoomSubjectWrapper perfectly aligns with the zoomSubject
-        // (no border, space, or anything between them)
-        const zoomSubjectWrapperRef = this.zoomSubjectWrapperRef;
-        // we don't wanna measure when zoomSubjectWrapperRef is not yet available or has been unmounted
-        zoomSubjectWrapperRef.current?.measureInWindow(
-          (x, y, width, height) => {
-            this.setState({
-              originalWidth: width,
-              originalHeight: height,
-              originalPageX: x,
-              originalPageY: y,
-            });
-          }
-        );
-      });
+      setTimeout(this.updateOriginalMeasurements);
     });
   };
+
+  private updateOriginalMeasurements = () => {
+    // In normal conditions, we're supposed to measure zoomSubject instead of its wrapper.
+    // However, our zoomSubject may have been transformed by an initial zoomLevel or offset,
+    // in which case these measurements will not represent the true "original" measurements.
+    // We just need to make sure the zoomSubjectWrapper perfectly aligns with the zoomSubject
+    // (no border, space, or anything between them)
+    const zoomSubjectWrapperRef = this.zoomSubjectWrapperRef;
+    // we don't wanna measure when zoomSubjectWrapperRef is not yet available or has been unmounted
+    zoomSubjectWrapperRef.current?.measure(
+      (x, y, width, height) => {
+        this.setState({
+          originalWidth: width,
+          originalHeight: height,
+          originalPageX: x,
+          originalPageY: y,
+        });
+      }
+    );
+  }
 
   /**
    * Handles the start of touch events and checks for taps
@@ -1000,7 +1002,11 @@ class ReactNativeZoomableView extends Component<
         style={styles.container}
         {...this.gestureHandlers.panHandlers}
         ref={this.zoomSubjectWrapperRef}
-        onLayout={this.grabZoomSubjectOriginalMeasurements}
+        onLayout={() => {
+          this.grabZoomSubjectOriginalMeasurements(); 
+          this.updateOriginalMeasurements();
+        }}
+          
       >
         <Animated.View
           style={[
