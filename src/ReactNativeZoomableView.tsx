@@ -242,7 +242,7 @@ class ReactNativeZoomableView extends Component<
       currState.originalHeight !== prevState.originalHeight ||
       currState.originalWidth !== prevState.originalWidth ||
       currState.originalPageX !== prevState.originalPageX ||
-      currState.originalPageY !== prevState.originalPageY;
+      currState.originalPageY !== prevState.originalPageY;    
 
     if (this.onTransformInvocationInitialized && originalMeasurementsChanged) {
       this._invokeOnTransform();
@@ -314,7 +314,7 @@ class ReactNativeZoomableView extends Component<
       // this setTimeout is here to fix a weird issue on iOS where the measurements are all `0`
       // when navigating back (react-navigation stack) from another view
       // while closing the keyboard at the same time
-      setTimeout(this.updateOriginalMeasurements);
+      setTimeout(() => this.updateOriginalMeasurements());
     });
   };
 
@@ -326,14 +326,15 @@ class ReactNativeZoomableView extends Component<
     // (no border, space, or anything between them)
     const zoomSubjectWrapperRef = this.zoomSubjectWrapperRef;
     // we don't wanna measure when zoomSubjectWrapperRef is not yet available or has been unmounted
-    zoomSubjectWrapperRef.current?.measure(
+    zoomSubjectWrapperRef.current?.measureInWindow(
       (x, y, width, height) => {
-        this.setState({
-          originalWidth: width,
-          originalHeight: height,
-          originalPageX: x,
-          originalPageY: y,
-        });
+        const newState = {
+          originalWidth: width ?? this.state.originalWidth,
+          originalHeight: height ?? this.state.originalHeight,
+          originalPageX: x ?? this.state.originalPageX,
+          originalPageY: y ?? this.state.originalPageY,
+        }
+        this.setState(newState);
       }
     );
   }
